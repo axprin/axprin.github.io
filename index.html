@@ -71,6 +71,14 @@
       padding-left: 1.2rem;
     }
 
+    a {
+      color: var(--text-light);
+    }
+
+    body.dark a {
+      color: var(--text-dark);
+    }
+
     footer {
       text-align: center;
       padding: 2rem;
@@ -139,8 +147,7 @@
   <section>
     <h2>Get in Touch</h2>
     <p>
-      Have a project in mind or need engineering leadership? Reach out anytime:<br>
-      <strong>andy.principe@gmail.com</strong>
+      Have a project in mind or need engineering leadership? <a href="#" data-email="andy DOT principe AT gmail DOT com">Send me an email</a>
     </p>
   </section>
 
@@ -167,6 +174,45 @@
     toggle.addEventListener("click", () => {
       const newMode = body.classList.contains("dark") ? "light" : "dark";
       applyTheme(newMode);
+    });
+
+    class EmailObfuscator {
+    constructor(selector = '[data-email]') {
+      this.selector = selector;
+    }
+
+    init() {
+      const links = document.querySelectorAll(this.selector);
+      links.forEach((link) => {
+        const encoded = link.getAttribute('data-email');
+        if (!encoded) return;
+
+        // Convert "picitelli AT gmail DOT com" → "picitelli@gmail.com"
+        const email = this.decodeEmail(encoded);
+
+        // Set the href to a proper mailto link
+        link.setAttribute('href', `mailto:${email}`);
+
+        // Optional: remove the data-email attribute so it's less obvious
+        // link.removeAttribute('data-email');
+      });
+    }
+
+    decodeEmail(encoded) {
+      return encoded
+        .trim()
+        // Replace " AT " (case-insensitive) with "@"
+        .replace(/\s+AT\s+/i, '@')
+        // Replace all " DOT " (case-insensitive) with "."
+        .replace(/\s+DOT\s+/gi, '.')
+        // Remove any leftover spaces
+        .replace(/\s+/g, '');
+    }
+  }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const obfuscator = new EmailObfuscator();
+      obfuscator.init();
     });
   </script>
 </body>

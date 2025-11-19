@@ -3,6 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="author" content="axprin">
+  <meta name="description" content="Software development based in Nashville, TN.">
+  <meta property="og:title" content="axprin">
+  <meta property="og:description" content="Software development based in Nashville, TN.">
+  <meta property="og:image" content="https://axprin.github.io/logo.png">
+  <meta property="og:url" content="https://axprin.github.io/">
+  <meta property="og:type" content="website">
+
   <link rel="icon" type="image/x-icon" href="/axprin_A_icon_32.ico" />
 
   <title>axprin</title>
@@ -73,6 +81,7 @@
 
     a {
       color: var(--text-light);
+      transition: color 0.4s ease, color 0.4s ease;
     }
 
     body.dark a {
@@ -93,17 +102,39 @@
 
     #themeToggle {
       margin-top: 1rem;
-      padding: 0.5rem 1rem;
       border: 1px solid #cbd5e1;
       background: none;
       cursor: pointer;
-      border-radius: 6px;
+      border-radius: 21px;
       transition: background 0.3s ease, color 0.3s ease, border 0.3s ease;
+      position: absolute;
+      top: 20px;
+      right: 40px;
     }
 
     body.dark #themeToggle {
       border-color: #475569;
       color: #e2e8f0;
+    }
+
+    .toggle-contrast {
+      align-items: center;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      height: 40px;
+      justify-content: center;
+      outline: none;
+    }
+    .toggle-contrast > svg {
+      display: block;
+      height: 24px;
+      fill: #000;
+      transition: all .3s;
+      width: 24px;
+    }
+    .dark .toggle-contrast > svg {
+      fill: #fff;
     }
   </style>
 </head>
@@ -112,7 +143,11 @@
     <img id="logo" src="A-logo-transparent.png" alt="axprin logo" style="width:120px; transition: opacity 0.3s ease;" />
     <div class="logo-text">axprin</div>
     <div class="tagline">Modern software, intelligent systems, real-world impact.</div>
-    <button id="themeToggle">Toggle Theme</button>
+    <button class="toggle-contrast" id="themeToggle" aria-label="Change contrast">
+      <svg focusable="false" aria-hidden="true" viewBox="0 0 24 24">
+        <path d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10m1-17.93c3.94.49 7 3.85 7 7.93s-3.05 7.44-7 7.93z"></path>
+      </svg>
+    </button>
   </header>
 
   <section>

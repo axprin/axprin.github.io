@@ -1,1 +1,173 @@
-<h1>THIS IS A TEST</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/x-icon" href="/axprin_A_icon_32.ico" />
+
+  <title>axprin</title>
+  <style>
+    :root {
+      --bg-light: #ffffff;
+      --text-light: #0f172a;
+      --bg-dark: #0f172a;
+      --text-dark: #e2e8f0;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      background: var(--bg-light);
+      color: var(--text-light);
+      line-height: 1.6;
+      transition: background 0.4s ease, color 0.4s ease;
+    }
+
+    body.dark {
+      background: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    header {
+      padding: 4rem 1.5rem;
+      text-align: center;
+      transition: background 0.4s ease, color 0.4s ease;
+    }
+
+    .logo-text {
+      font-size: 2.75rem;
+      font-weight: 700;
+      letter-spacing: -1px;
+    }
+
+    .tagline {
+      margin-top: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: #334155;
+      transition: color 0.4s ease;
+    }
+
+    body.dark .tagline {
+      color: #94a3b8;
+    }
+
+    section {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+      transition: background 0.4s ease, color 0.4s ease;
+    }
+
+    h2 {
+      margin-bottom: 0.5rem;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    ul {
+      margin-top: 0.5rem;
+      padding-left: 1.2rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #64748b;
+      font-size: 0.9rem;
+      transition: color 0.4s ease;
+    }
+
+    body.dark footer {
+      color: #94a3b8;
+    }
+
+    #themeToggle {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid #cbd5e1;
+      background: none;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.3s ease, color 0.3s ease, border 0.3s ease;
+    }
+
+    body.dark #themeToggle {
+      border-color: #475569;
+      color: #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img id="logo" src="A-logo-transparent.png" alt="axprin logo" style="width:120px; transition: opacity 0.3s ease;" />
+    <div class="logo-text">axprin</div>
+    <div class="tagline">Modern software, intelligent systems, real-world impact.</div>
+    <button id="themeToggle">Toggle Theme</button>
+  </header>
+
+  <section>
+    <h2>What We Do</h2>
+    <p>
+      axprin builds modern applications and intelligent systems that create measurable business impact.
+      We specialize in designing scalable architectures, implementing full-stack solutions, and integrating
+      AI-driven capabilities that elevate products and accelerate teams.
+    </p>
+  </section>
+
+  <section>
+    <h2>Core Services</h2>
+    <ul>
+      <li>Technical Architecture & Cloud Engineering</li>
+      <li>Full-Stack Application Development</li>
+      <li>AI-Driven Systems & Intelligent Automation</li>
+      <li>Performance, Scalability & Reliability Engineering</li>
+      <li>Fractional CTO / Technical Advisory</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>About axprin</h2>
+    <p>
+      Founded by a senior engineer with deep expertise across enterprise platforms, cloud ecosystems, and
+      AI-enhanced workflows, axprin brings precision and clarity to every engagement. We partner with
+      startups and enterprises to deliver reliable, maintainable, and future-ready software.
+    </p>
+  </section>
+
+  <section>
+    <h2>Get in Touch</h2>
+    <p>
+      Have a project in mind or need engineering leadership? Reach out anytime:<br>
+      <strong>andy.principe@gmail.com</strong>
+    </p>
+  </section>
+
+  <footer>
+    © <span id="year"></span> axprin. All rights reserved.
+  </footer>
+
+  <script>
+    const yearEl = document.getElementById("year");
+    yearEl.textContent = new Date().getFullYear();
+
+    const toggle = document.getElementById("themeToggle");
+    const body = document.body;
+    const logo = document.getElementById("logo");
+
+    function applyTheme(mode) {
+      body.classList.toggle("dark", mode === "dark");
+      localStorage.setItem("theme", mode);
+    }
+
+    const saved = localStorage.getItem("theme") || "light";
+    applyTheme(saved);
+
+    toggle.addEventListener("click", () => {
+      const newMode = body.classList.contains("dark") ? "light" : "dark";
+      applyTheme(newMode);
+    });
+  </script>
+</body>
+</html>

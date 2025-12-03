@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>living system</title>
+<style>
+html, body {
+  margin: 0;
+  background: #0f172a;
+  overflow: hidden;
+}
+canvas {
+  display: block;
+  width: 100vw;
+  height: calc(100vw * 9 / 16);
+  max-height: 100vh;
+  max-width: calc(100vh * 16 / 9);
+  margin: auto;
+}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<script>
+/* =========================
+   CONFIG
+========================= */
+const WIDTH = 1920;
+const HEIGHT = 1080;
+
+const BG = "#0f172a";
+const LIGHT = "#e2e8f0";
+const COPPER = "#b9895e";
+
+const RINGS = 24;
+const NODES = 20;
+
+/* =========================
+   LOGO
+========================= */
+const logoImg = new Image();
+logoImg.src = "./A-logo-transparent.png";
+let logoReady = false;
+logoImg.onload = () => logoReady = true;
+
+let logoState = "hidden";
+let logoAlpha = 0;
+let logoTimer = 0;
+let logoNextTime = randomBetween(60, 120);
+
+let logoX, logoY, logoSize;
+
+/* =========================
+   SETUP
+========================= */
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+
+function resize(){
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = WIDTH * dpr;
+  canvas.height = HEIGHT * dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+resize();
+window.addEventListener("resize", resize);
+
+const cx = WIDTH / 2;
+const cy = HEIGHT / 2;
+
+/* =========================
+   UTILS
+========================= */
+const lerp=(a,b,t)=>a+(b-a)*t;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const smooth=(a,b,t)=>{
+  t=clamp((t-a)/(b-a),0,1);
+  return t*t*(3-2*t);
+};
+const rand=(i,s=1)=>Math.abs(Math.sin(i*97.13+s*51.7))%1;
+const rgba=(hex,a)=>{
+  const r=parseInt(hex.substr(1,2),16);
+  const g=parseInt(hex.substr(3,2),16);
+  const b=parseInt(hex.substr(5,2),16);
+  return `rgba(${r},${g},${b},${a})`;
+};
+function randomBetween(min,max){
+  return min + Math.random()*(max-min);
+}
+
+/* Golden-ratio biased placement (avoids dead center) */
+function goldenPlacement(size){
+  const phi = 0.618;
+  const margin = size * 0.6;
+
+  let x = WIDTH * ((Math.random() < 0.5) ? phi : 1 - phi);
+  let y = HEIGHT * ((Math.random() < 0.5) ? phi : 1 - phi);
+
+  x += randomBetween(-120, 120);
+  y += randomBetween(-80, 80);
+
+  return {
+    x: clamp(x, margin, WIDTH - margin),
+    y: clamp(y, margin, HEIGHT - margin)
+  };
+}
+
+/* =========================
+   SYSTEM PRIMITIVES
+========================= */
+const rings = Array.from({length:RINGS}).map((_,i)=>({
+  base: lerp(90,520,i/(RINGS-1)),
+  phase: rand(i,3)*Math.PI*2,
+  speed: lerp(0.05,0.16,rand(i,7))
+}));
+
+const nodes = Array.from({length:NODES}).map((_,i)=>({
+  r: lerp(140,520,rand(i,9)),
+  a: rand(i,11)*Math.PI*2,
+  speed: lerp(0.14,0.28,rand(i,13))
+}));
+
+/* =========================
+   TIME
+========================= */
+let t = 0;
+let last = null;
+
+/* =========================
+   DRAW LOOP
+========================= */
+function draw(ts){
+  if(!last) last = ts;
+  const dt = (ts - last) / 1000;
+  last = ts;
+  t += dt;
+
+  const drive  = 0.6 + 0.3 * Math.sin(t * 0.11);
+  const surge  = 0.6 + 0.4 * Math.sin(t * 0.19);
+  const settle = 0.5 + 0.4 * Math.sin(t * 0.05);
+
+  ctx.fillStyle = BG;
+  ctx.fillRect(0,0,WIDTH,HEIGHT);
+
+  ctx.save();
+  ctx.translate(
+    cx + Math.sin(t*0.28)*drive*150,
+    cy + Math.cos(t*0.21)*drive*100
+  );
+
+  /* ===== RINGS ===== */
+  rings.forEach((r,i)=>{
+    const wave = Math.sin(t*1.05 + i*0.8);
+    const radius = lerp(
+      r.base + wave*drive*120,
+      300 + Math.sin(t*0.1+i)*40,
+      settle*0.45
+    );
+
+    const rot = r.phase + t*(r.speed + drive*1.1) + wave*drive;
+    const copperWave = Math.sin(t*1.4 - radius*0.02);
+    const hot = copperWave > 0.7 && logoAlpha > 0.4 && i%3===0;
+
+    ctx.save();
+    ctx.rotate(rot);
+    ctx.strokeStyle = rgba(hot ? COPPER : LIGHT, hot ? 0.75 : 0.22 + drive*0.2);
+    ctx.lineWidth = 0.9 + drive*2.4;
+    ctx.beginPath();
+    ctx.arc(0,0,radius,rand(i,5)*Math.PI*2,rand(i,6)*Math.PI*2 + Math.PI*(0.9+drive));
+    ctx.stroke();
+    ctx.restore();
+  });
+
+  ctx.restore();
+
+  /* ===== VIGNETTE ===== */
+  const grad = ctx.createRadialGradient(cx,cy,200,cx,cy,WIDTH*0.65);
+  grad.addColorStop(0,"rgba(0,0,0,0)");
+  grad.addColorStop(1,"rgba(0,0,0,0.28)");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,WIDTH,HEIGHT);
+
+  /* =========================
+     LOGO STATE MACHINE
+  ========================= */
+  logoTimer += dt;
+
+  if(logoState==="hidden" && logoTimer > logoNextTime){
+    logoState = "fadeIn";
+    logoTimer = 0;
+    logoSize = randomBetween(320, 480);
+    const pos = goldenPlacement(logoSize);
+    logoX = pos.x;
+    logoY = pos.y;
+  }
+
+  if(logoState==="fadeIn"){
+    logoAlpha += dt / 4;
+    if(logoAlpha >= 1){
+      logoAlpha = 1;
+      logoState = "visible";
+      logoTimer = 0;
+    }
+  }
+
+  if(logoState==="visible" && logoTimer > randomBetween(6,10)){
+    logoState = "fadeOut";
+    logoTimer = 0;
+  }
+
+  if(logoState==="fadeOut"){
+    logoAlpha -= dt / 4;
+    if(logoAlpha <= 0){
+      logoAlpha = 0;
+      logoState = "hidden";
+      logoTimer = 0;
+      logoNextTime = randomBetween(60,120);
+    }
+  }
+
+  if(logoAlpha > 0 && logoReady){
+    const w = logoSize;
+    const h = (logoImg.height/logoImg.width)*w;
+    ctx.save();
+    ctx.globalAlpha = logoAlpha;
+    ctx.shadowColor = rgba(COPPER,0.5);
+    ctx.shadowBlur = logoAlpha * 24;
+    ctx.drawImage(logoImg,logoX-w/2,logoY-h/2,w,h);
+    ctx.restore();
+  }
+
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+</script>
+</body>
+</html>
